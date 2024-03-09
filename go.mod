@@ -1,4 +1,4 @@
-module github.com/matt-helium/looper
+module github.com/mdthompson-helium/looper
 
 go 1.22.0
 
