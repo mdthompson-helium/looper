@@ -4,12 +4,16 @@ Copyright © 2024 matt@heliumdev.com
 package cmd
 
 import (
+	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"time"
 
 	"github.com/spf13/cobra"
 )
+
+var random bool
 
 var rootCmd = &cobra.Command{
 	Use:   "looper",
@@ -18,7 +22,10 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		loop()
+		voice := cmd.Flag("voice").Value.String()
+		rate := cmd.Flag("rate").Value.String()
+		speech := cmd.Flag("speech").Value.String()
+		loop(voice, rate, speech)
 	},
 }
 
@@ -30,16 +37,24 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().StringP("voice", "v", "grandpa", "What voice do you want to use?")
+	rootCmd.Flags().StringP("rate", "r", "100", "How fast should they speak?")
+	rootCmd.Flags().StringP("speech", "s", "chicken", "What should they say?")
+	rootCmd.Flags().BoolVar(&random, "random", false, "Should the speech be random?")
 }
 
 
-func loop() {
+func loop(voice string, rate string, speech string) {
 	for {
-		cmd := exec.Command("say", "-v", "grandpa", "-r", "10", "'chicken'")
+		cmd := exec.Command("say", "-v", voice, "-r", rate, fmt.Sprintf("'%s'", speech))
 		if err := cmd.Run(); err != nil {
 			panic(err)
 		}
-		time.Sleep(1 * time.Second)
+		sleepTime := 1 * time.Second
+		if random {
+			sleepTime = time.Duration(5 + (rand.Intn(1200))) * time.Second
+		}
+		fmt.Println("Sleeping for", sleepTime)
+		time.Sleep(sleepTime)
 	}
 }
